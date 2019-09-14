@@ -1,7 +1,8 @@
 from pathlib import Path
+import datetime
 
 
-def scrape(filename):
+def scrape(filename, start = None, end = None):
     # tag (INFO, etc)
     # date and time
     # kind of event
