@@ -12,7 +12,7 @@ def scrape(filename):
     line = f.readline()
     while line:
         for keyword in keywords:
-            if keyword in line:
+            if (keyword == "GitHandler" and "GitHandler" in line and "commit" in line) or (keyword != "GitHandler" and keyword in line):
                 line = line.strip("\n")
                 line_parts_spaces = line.split(" ")
                 line_parts_spaces = [elt for elt in line_parts_spaces if elt != ""]
@@ -22,15 +22,18 @@ def scrape(filename):
                 print(line_parts_spaces)
                 event_kind = keyword
 
-                line_parts_hyphens = line.split("-")
-                line_parts_hyphens = [elt for elt in line_parts_hyphens if elt != "" and elt != " "]
-                print(line_parts_hyphens)
-                message = line_parts_hyphens[-1]
+                if keyword == "GitHandler":
+                    message = line_parts_spaces[7]
+                else:
+                    line_parts_hyphens = line.split("-")
+                    line_parts_hyphens = [elt for elt in line_parts_hyphens if elt != "" and elt != " "]
+                    print(line_parts_hyphens)
+                    message = line_parts_hyphens[-1]
 
                 line_info = {"TAG" : tag,
                     "DATE" : date,
                     "TIME" : time,
-                    "EVENT_KIND" : event_kind,
+                    "SOURCE" : event_kind,
                     "MESSAGE" : message}
 
                 yield line_info
@@ -38,12 +41,13 @@ def scrape(filename):
 
 
 if __name__ == '__main__':
-    keywords = { "IDE STARTED",
+    keywords = {
+        "IDE STARTED",
         "IDE SHUTDOWN",
         "COMPILATION STARTED",
         "COMPILATION FINISHED",
-        "Saving Project" #,
-        #"GitHandler"
+        "Saving Project",
+        "GitHandler"
         }
         # if it contains githandler, must also contain commit
 
