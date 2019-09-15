@@ -25,8 +25,6 @@ TIMESTAMP = "TIMESTAMP"
 
 # date, time, tag, source, message
 def get_data(log_file, start=None, end=None):
-    # counts = {event : 0 for event in {COMPILATION_STARTED, COMPILATION_FINISHED, IDE_STARTED, IDE_SHUTDOWN, SAVING_PROJECT, ERROR, GIT_HANDLER}}
-
     df = pd.DataFrame(columns = [TIMESTAMP, TAG, SOURCE, MESSAGE])
 
     time_since_last_commit = 0
@@ -36,27 +34,28 @@ def get_data(log_file, start=None, end=None):
         df_row = pd.DataFrame(data = [[timestamp, line[TAG], line[SOURCE], line[MESSAGE]]], columns = [TIMESTAMP, TAG, SOURCE, MESSAGE], )
         df = df.append(df_row)
 
-        # print(timestamp)
+    df.sort_values(by=TIMESTAMP, axis=0, inplace=True)
+    return df
 
-        # time_since_last_commit += 0
-        # if COMPILATION_STARTED in line[SOURCE]:
-        #     counts[COMPILATION_STARTED] += 1
-        # if COMPILATION_FINISHED in line[SOURCE]:
-        #     counts[COMPILATION_FINISHED] += 1
-        # if IDE_STARTED in line[SOURCE]:
-        #     counts[IDE_STARTED] += 1
-        # if IDE_SHUTDOWN in line[SOURCE]:
-        #     counts[IDE_SHUTDOWN] += 1
-        # if SAVING_PROJECT in line[SOURCE]:
-        #     counts[SAVING_PROJECT] += 1
-        # if ERROR in line[TAG]:
-        #     counts[ERROR] += 1
-        # if GIT_HANDLER in line[SOURCE]: # we already have commit
-        #     counts[GIT_HANDLER] += 1
+def group_by_windows(df):
+    columns=["START",  COMPILATION_STARTED, COMPILATION_FINISHED, IDE_STARTED, IDE_SHUTDOWN, SAVING_PROJECT, GIT_HANDLER]
+    grouped_df = pd.DataFrame(columns=columns)
 
-    print(df)
-    # print(counts)
-    # return counts
+    # df.set_index(TIMESTAMP, inplace=True, drop=False)
+    start = df.head(1)[TIMESTAMP]
+    print(start)
+    end = start + datetime.timedelta(hours=1)
+    print(end)
+
+    window = {event : 0 for event in columns}
+
+    for name, row, in df.iterrows():
+        if row.values[0] < pd.Timestamp(end.values[0]):
+            window[row[SOURCE]] += 1
+
+
+    print(window)
+
 
 def plot(data):
     df = pd.DataFrame(data, index=[0])
@@ -89,4 +88,4 @@ def plot_point(data_generator, start, end):
 if __name__ == '__main__':
     filename = "/Library/Logs/IdeaIC2019.2/idea.log"
     data = get_data(filename)
-    #plot(data)
+    group_by_windows(data)
