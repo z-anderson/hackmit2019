@@ -31,7 +31,7 @@ def get_data(log_file, start=None, end=None):
     for line in scrape(log_file, start, end):
         timestamp = datetime.datetime.strptime(line[DATE] + " " + line[TIME], "%Y-%m-%d %H:%M:%S,%f")
 
-        df_row = pd.DataFrame(data = [[timestamp, line[TAG], line[SOURCE], line[MESSAGE]]], columns = [TIMESTAMP, TAG, SOURCE, MESSAGE], )
+        df_row = pd.DataFrame(data = [[timestamp, line[TAG], line[SOURCE], line[MESSAGE]]], columns = [TIMESTAMP, TAG, SOURCE, MESSAGE])
         df = df.append(df_row)
 
     df.sort_values(by=TIMESTAMP, axis=0, inplace=True)
@@ -43,19 +43,29 @@ def group_by_windows(df):
 
     # df.set_index(TIMESTAMP, inplace=True, drop=False)
     start = df.head(1)[TIMESTAMP]
-    print(start)
     end = start + datetime.timedelta(hours=1)
-    print(end)
+    end = pd.Timestamp(end.values[0])
 
     window = {event : 0 for event in columns}
 
     for name, row, in df.iterrows():
-        if row.values[0] < pd.Timestamp(end.values[0]):
+        if row.values[0] < end:
+            window[row[SOURCE]] += 1
+        else:
+            # concat old window
+            window_df = pd.DataFrame(data=window, columns=columns, index = [0])
+            grouped_df = grouped_df.append(window_df)
+
+            # set up new window values
+            start = row.values[0] # timestamp
+            end = start + datetime.timedelta(hours=1)
+
+            # catch this row
             window[row[SOURCE]] += 1
 
-
-    print(window)
-
+    # need to concat at end to not miss last window
+    grouped_df = grouped_df.append(window_df)
+    return grouped_df
 
 def plot(data):
     df = pd.DataFrame(data, index=[0])
