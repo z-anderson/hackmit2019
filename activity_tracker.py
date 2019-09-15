@@ -104,8 +104,11 @@ def plot_point(data_generator, start, end):
         for line in data_generator:
             pass
 
-if __name__ == '__main__':
-    filename = "/Library/Logs/IdeaIC2019.2/idea.log"
+def driver(filename):
     data = get_data(filename)
     window_data = group_by_windows(data)
     plot(window_data)
+
+if __name__ == '__main__':
+    filename = "/Library/Logs/IdeaIC2019.2/idea.log"
+    driver(filename)
