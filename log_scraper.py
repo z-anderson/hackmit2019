@@ -18,6 +18,9 @@ keywords = {"IDE STARTED",
 
 
 def scrape(filename, start = None, end = None):
+    home = str(Path.home())
+    filename = "/" + home + "/Library/Logs/IdeaIC2019.2/idea.log"
+
     # TODO actually use start and end
     # tag (INFO, etc)
     # date and time
@@ -57,11 +60,7 @@ def scrape(filename, start = None, end = None):
 
 
 if __name__ == '__main__':
-
-
-    home = str(Path.home())
-
-    filename = "/" + home + "/Library/Logs/IdeaIC2019.2/idea.log"
+    filename = "/Library/Logs/IdeaIC2019.2/idea.log"
     result = scrape(filename)
     print(result)
     print(list(result))
