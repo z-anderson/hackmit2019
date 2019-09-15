@@ -47,6 +47,7 @@ def group_by_windows(df):
     end = pd.Timestamp(end.values[0])
 
     window = {event : 0 for event in columns}
+    window["START"] = start
 
     for name, row, in df.iterrows():
         if row.values[0] < end:
@@ -60,6 +61,9 @@ def group_by_windows(df):
             start = row.values[0] # timestamp
             end = start + datetime.timedelta(hours=1)
 
+            window = {event : 0 for event in columns}
+            window["START"] = start
+
             # catch this row
             window[row[SOURCE]] += 1
 
@@ -67,24 +71,32 @@ def group_by_windows(df):
     grouped_df = grouped_df.append(window_df)
     return grouped_df
 
-def plot(data):
-    df = pd.DataFrame(data, index=[0])
-    print(df)
+def plot(df):
+    print("df", df)
+    x = df["START"]
+    compilation_started = df[COMPILATION_STARTED]
+    copmilation_finished = df[COMPILATION_FINISHED]
+    ide_started = df[IDE_STARTED]
+    ide_shutdown = df[IDE_SHUTDOWN]
+    saving_project = df[SAVING_PROJECT]
+    git_handler = df[GIT_HANDLER]
 
-    x = np.linspace(0, 2, 100)
+    print("x", x)
+    print("compilation_started", compilation_started)
 
-    plt.plot(x, x, label='linear')
-    plt.plot(x, x**2, label='quadratic')
-    plt.plot(x, x**3, label='cubic')
-
-    plt.xlabel('x label')
-    plt.ylabel('y label')
-
-    plt.title("Simple Plot")
-
-    plt.legend()
-
+    plt.plot(x, compilation_started, label=COMPILATION_STARTED)
     plt.show()
+
+    # plt.plot(df["START"], df)
+    #
+    # plt.xlabel('x label')
+    # plt.ylabel('y label')
+    #
+    # plt.title("Activity")
+    #
+    # plt.legend()
+    #
+    # plt.show()
 
 
 
@@ -98,4 +110,5 @@ def plot_point(data_generator, start, end):
 if __name__ == '__main__':
     filename = "/Library/Logs/IdeaIC2019.2/idea.log"
     data = get_data(filename)
-    group_by_windows(data)
+    window_data = group_by_windows(data)
+    plot(window_data)
