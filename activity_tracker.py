@@ -38,7 +38,6 @@ def get_data(log_file, start=None, end=None):
     return df
 
 def group_by_windows(df):
-    print(df)
     columns=["START",  COMPILATION_STARTED, COMPILATION_FINISHED, IDE_STARTED, IDE_SHUTDOWN, SAVING_PROJECT, GIT_HANDLER]
     grouped_df = pd.DataFrame(columns=columns)
 
@@ -50,15 +49,10 @@ def group_by_windows(df):
     window = {event : 0 for event in columns}
     window["START"] = start
 
-    print("start", start)
-    print("end", end)
-
     for name, row, in df.iterrows():
-        print("timestamp", row.values[0])
         if row.values[0] < end:
             window[row[SOURCE]] += 1
         else:
-            print("start new window")
             # concat old window
             window_df = pd.DataFrame(data=window, columns=columns, index = [0])
             grouped_df = grouped_df.append(window_df)
@@ -73,15 +67,11 @@ def group_by_windows(df):
             # catch this row
             window[row[SOURCE]] += 1
 
-            print("start", start)
-            print("end", end)
-
     # need to concat at end to not miss last window
     grouped_df = grouped_df.append(window_df)
     return grouped_df
 
 def plot(df):
-    print("df", df)
     x = df["START"]
     compilation_started = df[COMPILATION_STARTED]
     copmilation_finished = df[COMPILATION_FINISHED]
